@@ -19,9 +19,9 @@ func (r *BoardRepo) Create(board *entity.Board) error {
 	return r.db.Create(board).Error
 }
 
-func (r *BoardRepo) GetByID(id int) (*entity.Board, error) {
+func (r *BoardRepo) GetByID(id string) (*entity.Board, error) {
 	var board entity.Board
-	if err := r.db.First(&board, id).Error; err != nil {
+	if err := r.db.Where("id = ?", id).First(&board).Error; err != nil {
 		return nil, err
 	}
 	return &board, nil
@@ -29,7 +29,13 @@ func (r *BoardRepo) GetByID(id int) (*entity.Board, error) {
 
 func (r BoardRepo) GetAll(page int, page_size int) ([]entity.Board, error) {
 	var boards []entity.Board
-	if err := r.db.Offset((page - 1) * page_size).Limit(page_size).Find(&boards).Error; err != nil {
+	if err := r.db.
+		Offset((page-1)*page_size).
+		Limit(page_size).
+		Preload("Lists", func(db *gorm.DB) *gorm.DB {
+			return db.Order("position asc")
+		}).
+		Find(&boards).Error; err != nil {
 		return nil, err
 	}
 	return boards, nil
@@ -39,7 +45,7 @@ func (r *BoardRepo) Update(board *entity.Board) error {
 	return r.db.Save(board).Error
 }
 
-func (r *BoardRepo) Delete(id int) error {
+func (r *BoardRepo) Delete(id string) error {
 	return r.db.Delete(&entity.Board{}, id).Error
 }
 

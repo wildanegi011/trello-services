@@ -17,7 +17,7 @@ func (uc *BoardUsecase) Create(board *entity.Board) error {
 	return uc.repo.Create(board)
 }
 
-func (uc *BoardUsecase) GetByID(id int) (*entity.Board, error) {
+func (uc *BoardUsecase) GetByID(id string) (*entity.Board, error) {
 	return uc.repo.GetByID(id)
 }
 
@@ -45,6 +45,6 @@ func (uc *BoardUsecase) Update(board *entity.Board) error {
 	return uc.repo.Update(board)
 }
 
-func (uc *BoardUsecase) Delete(id int) error {
+func (uc *BoardUsecase) Delete(id string) error {
 	return uc.repo.Delete(id)
 }

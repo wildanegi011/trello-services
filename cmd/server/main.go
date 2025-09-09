@@ -29,7 +29,12 @@ func main() {
 	r := setupRouter()
 
 	// get port form env (default : 8080)
-	port := config.GetEnv("SERVER_PORT", ":8080")
+	port := config.GetEnv("SERVER_PORT", "8080")
+
+	// ensure port starts with ':'
+	if port[0] != ':' {
+		port = ":" + port
+	}
 
 	// create server
 	srv := &http.Server{

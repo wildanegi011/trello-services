@@ -1,3 +1,11 @@
 .env
 env
-temp/*
+.vscode/*
+tmp/*
+.DS_Store
+*.log
+/build
+/dist
+/coverage
+/.idea
+bin/*

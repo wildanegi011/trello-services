@@ -18,6 +18,7 @@ func NewBoardHandler(r *gin.RouterGroup, uc *usecase.BoardUsecase) {
 
 	r.POST("/boards", h.Create)
 	r.GET("/boards", h.GetAll)
+	r.GET("/boards/:id", h.GetByID)
 }
 
 func (h *BoardHandler) Create(ctx *gin.Context) {
@@ -44,4 +45,14 @@ func (h *BoardHandler) GetAll(ctx *gin.Context) {
 		return
 	}
 	JsonSuccessWithMetadata(ctx, boards, total, page, pageSize)
+}
+
+func (h *BoardHandler) GetByID(ctx *gin.Context) {
+	id := ctx.Param("id")
+	board, err := h.uc.GetByID(id)
+	if err != nil {
+		JsonError(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+	JsonSuccess(ctx, board)
 }

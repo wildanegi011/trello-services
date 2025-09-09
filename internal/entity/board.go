@@ -9,4 +9,7 @@ type Board struct {
 	ImageFullUrl  string `gorm:"size:255" json:"image_full_url"`
 	ImageUserName string `gorm:"size:100" json:"image_user_name"`
 	ImageLinkHtml string `gorm:"size:255" json:"image_link_html"`
+	Lists         []List `gorm:"foreignKey:BoardID;references:ID" json:"lists"`
+	CreatedAt     string `gorm:"autoCreateTime;column:createdAt" json:"created_at"`
+	UpdatedAt     string `gorm:"autoUpdateTime;column:updatedAt" json:"updated_at"`
 }
