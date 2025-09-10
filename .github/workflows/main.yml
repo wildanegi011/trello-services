@@ -69,7 +69,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t your-dockerhub-username/trello-services:latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/trello-services:latest .
 
       - name: Push Docker image
-        run: docker push your-dockerhub-username/trello-services:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/trello-services:latest
