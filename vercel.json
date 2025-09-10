@@ -1,6 +1,10 @@
 {
-    "trailingSlash": false,
-    "rewrites": [
-        { "source": "/(.*)", "destination": "/api/handler.go" }
-    ]
+  "functions": {
+    "api/handler.go": {
+      "runtime": "vercel-go@2.0.0"
+    }
+  },
+  "routes": [
+    { "src": "/(.*)", "dest": "/api/handler.go" }
+  ]
 }
