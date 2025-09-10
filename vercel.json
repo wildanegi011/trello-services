@@ -1,9 +1,6 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "api/handler.go", "use": "@vercel/go" }
-  ],
-  "routes": [
-    { "src": "/.*", "dest": "api/handler.go" }
-  ]
+    "trailingSlash": false,
+    "rewrites": [
+        { "source": "/(.*)", "destination": "/api/handler.go" }
+    ]
 }
