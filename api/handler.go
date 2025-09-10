@@ -5,6 +5,9 @@ import (
 	"trello-services/internal/app"
 )
 
+var router = app.NewRouter()
+
+// Vercel entrypoint
 func Handler(w http.ResponseWriter, r *http.Request) {
-	app.Handler(w, r)
+	router.ServeHTTP(w, r)
 }
