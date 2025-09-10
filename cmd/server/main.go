@@ -1,13 +1,8 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 	"trello-services/infrastructure/config"
 	"trello-services/infrastructure/db"
 	delivery "trello-services/internal/delivery/http"
@@ -16,7 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
+// global router to reuse between invocations (important for serverless)
+var r *gin.Engine
+
+func init() {
 	// load environment variables
 	config.LoadEnv()
 
@@ -25,33 +23,21 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// build router
-	r := setupRouter()
+	// build router once
+	r = setupRouter()
+}
 
-	// get port form env (default : 8080)
+func main() {
+	// For environments where we run a normal server (not serverless)
 	port := config.GetEnv("SERVER_PORT", "8080")
-
-	// ensure port starts with ':'
 	if port[0] != ':' {
 		port = ":" + port
 	}
 
-	// create server
-	srv := &http.Server{
-		Addr:    port,
-		Handler: r,
+	log.Printf("Server running at %s\n", port)
+	if err := http.ListenAndServe(port, r); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("Failed to start server: %v", err)
 	}
-
-	// run server in gorountine
-	go func() {
-		log.Printf("server running at %s\n", port)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("failed to start server: %v", err)
-		}
-	}()
-
-	// graceful shutdown
-	gracefulShutdown(srv, 5*time.Second)
 
 }
 
@@ -60,30 +46,18 @@ func setupRouter() *gin.Engine {
 	boardRepo := db.NewBoardRepo(database)
 	boardUsecase := usecase.NewBoardUsecase(boardRepo)
 
-	r := gin.Default()
-	if err := r.SetTrustedProxies(nil); err != nil {
-		log.Fatalf("failed to set trusted proxies: %v", err)
+	router := gin.Default()
+	if err := router.SetTrustedProxies(nil); err != nil {
+		log.Fatalf("Failed to set trusted proxies: %v", err)
 	}
 
-	api := r.Group("/api/v1")
+	api := router.Group("/api/v1")
 	delivery.NewBoardHandler(api, boardUsecase)
 
-	return r
+	return router
 }
 
-func gracefulShutdown(srv *http.Server, timeout time.Duration) {
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	log.Println("shutting down server...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("server forced to shutdown:", err)
-	}
-
-	log.Println("server exited properly")
+// For serverless platforms (like Vercel/Railway handler entrypoint)
+func Handler(w http.ResponseWriter, req *http.Request) {
+	r.ServeHTTP(w, req)
 }
